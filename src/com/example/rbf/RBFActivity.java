@@ -12,6 +12,7 @@ import org.opencv.android.CameraBridgeViewBase.CvCameraViewFrame;
 import org.opencv.android.CameraBridgeViewBase.CvCameraViewListener2;
 import org.opencv.core.CvType;
 import org.opencv.core.Mat;
+import org.opencv.core.Rect;
 import org.opencv.highgui.Highgui;
 import org.opencv.imgproc.Imgproc;
 
@@ -163,8 +164,9 @@ public class RBFActivity extends Activity implements CvCameraViewListener2 {
 			tts.speak("Down..", TextToSpeech.QUEUE_ADD, null);
 			
 		}
-		
-		return mRgba;
+			
+			
+		return mGray;
 	}
 
 	@Override

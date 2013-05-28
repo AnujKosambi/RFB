@@ -68,7 +68,7 @@ void decreaseMargin(vector<Vec4i> lines,int width,int top){
 	if(count!=0)
 	avg/=count;
 	if(width<screenWidth/2)
-    width=avg+5;
+    width=avg+10;
 	if(top==1)V_MARGIN=(int)(screenWidth/width);
 	else H_MARGIN=(int)(screenWidth/width);
 
@@ -92,12 +92,12 @@ Point2f computeIntersect(Vec4i a, Vec4i b)
 
 JNIEXPORT jint JNICALL Java_com_example_rbf_RBFActivity_processingImage
   (JNIEnv *env, jobject thisObj, jlong addrRGB,jlong addrGray){
-
+//*
 	Mat& mRGB  = *(Mat*)addrRGB;
 	Mat& mGray  = *(Mat*)addrGray;
 
     cvtColor(mRGB, mGray, CV_BGR2GRAY);
-    GaussianBlur(mGray, mGray, Size(7, 7), 2.0, 2.0);
+    GaussianBlur(mGray, mGray, Size(5, 5), 2.0, 2.0);
     //pyrMeanShiftFiltering(mRGB, mRGB, 6, 4.5);
 	Canny(mGray,mGray,  66.0, 133.0, 3);
 	vector<Vec4i> lines;
@@ -114,13 +114,6 @@ JNIEXPORT jint JNICALL Java_com_example_rbf_RBFActivity_processingImage
 	if(lines.size()<=50)
 		for(int i=0;i<lines.size();i++){
 
-	  /*    Vec4i v = lines[i];
-		counter[j].x=v[0];
-		counter[j].y=v[1];
-		j++;
-		counter[j].x=v[2];
-		counter[j].y=v[3];
-		 */
 		Vec4i l = lines[i];
 		if(l[0]>=1||(l[1]>=1 &l[1]<screenHeight-1))
 		temp[returnIndex(l[0],width,H_MARGIN)][returnIndex(l[1],height,V_MARGIN)]++;
@@ -129,6 +122,7 @@ JNIEXPORT jint JNICALL Java_com_example_rbf_RBFActivity_processingImage
 
 
 		if((l[0]>=1||(l[1]>=1 &l[1]<screenHeight-1))||(l[2]>=1||(l[3]>=1 &l[3]<screenHeight-1) ))
+			/////////////////////Debug Only////////////////////////////
 		line( mRGB, Point(l[0], l[1]), Point(l[2], l[3]), Scalar(0,0,255), 3, CV_AA);
 
 	}
@@ -173,7 +167,7 @@ JNIEXPORT jint JNICALL Java_com_example_rbf_RBFActivity_processingImage
 			DIRECTION=21;
 		else DIRECTION=111;
 
-	}*/
+	}/
 
 	int leftD=0,topD=0,bottomD=0,rightD=0;
 
@@ -188,13 +182,12 @@ JNIEXPORT jint JNICALL Java_com_example_rbf_RBFActivity_processingImage
 	else if(sum==9)
 		{
 
-		DIRECTION=111;
 		if(temp[1][1]<2)
 		if(leftD==3)
-		decreaseMargin(lines,screenWidth,0);
+		decreaseMargin(lines,width,0);
 		else
-		decreaseMargin(lines,screenHeight,1);
-		DIRECTION=112;
+		decreaseMargin(lines,height,1);
+		DIRECTION=111;
 		}
 	else if(sum>6)
 		{
@@ -215,6 +208,7 @@ JNIEXPORT jint JNICALL Java_com_example_rbf_RBFActivity_processingImage
 	line( mRGB, Point(0,(V_MARGIN-1)*height), Point(screenWidth, (V_MARGIN-1)*height), Scalar(0,255,0), 2, CV_AA);
 	line( mRGB, Point(width, 0), Point(width, screenHeight), Scalar(0,255,0), 2, CV_AA);
 	line( mRGB, Point(width*(H_MARGIN-1),0), Point(width*(H_MARGIN-1), screenHeight), Scalar(0,255,0),2, CV_AA);
+	////////////////////////////Tp////////////////////////////////////////////////////////////
 	stringstream t;		t<<DIRECTION;
 	putText(mRGB, "+", Point(screenWidth/3, screenHeight/3) , FONT_HERSHEY_PLAIN, 2, Scalar(0,255,0),2,3);
 	putText(mRGB, "+", Point((2*screenWidth)/3,screenHeight/3) , FONT_HERSHEY_PLAIN, 2, Scalar(0,255,0),2,3);
@@ -223,7 +217,7 @@ JNIEXPORT jint JNICALL Java_com_example_rbf_RBFActivity_processingImage
 	putText(mRGB, t.str(), Point(screenWidth/2,screenHeight/2) , FONT_HERSHEY_PLAIN, 2, Scalar(255,0,0),2,3);
 
 
-/*	vector<Point> contours_poly(counter.size());
+	vector<Point> contours_poly(counter.size());
 	approxPolyDP( Mat(counter), contours_poly, 3, true );
 	if(counter.size()>=4){
 	Rect boundRect = boundingRect( Mat(contours_poly) );
@@ -255,17 +249,28 @@ JNIEXPORT jint JNICALL Java_com_example_rbf_RBFActivity_processingImage
 	         }
 
 	  }
-	  }/*
+	  }
+	  */
+	///////////////////////////////////////////////////////////////////
+	/*
 		Mat& mRGB  = *(Mat*)addrRGB;
+		 Mat& mGray  = *(Mat*)addrGray;
+
 		Mat imgGray;
-		medianBlur(mRGB, mRGB,15);
-	    cvtColor( mRGB, imgGray, CV_BGR2GRAY );
+		Mat temp;
+
+		cvtColor( mRGB, temp, CV_BGRA2BGR,3 );
+		line( mGray, Point(100,100), Point(100,100), Scalar(0,0,255), 2, CV_AA);
+
+			///posterized image...
+		pyrMeanShiftFiltering(temp, temp, 5, 50);
+	    cvtColor( temp, imgGray, CV_BGR2GRAY );
+	   GaussianBlur(imgGray, imgGray, Size(5, 5), 2.0, 2.0);
 	    ////////////////////
 
+	   Canny(imgGray, imgGray,66.0,133.0, 3);
 
-    	inRange(imgGray, Scalar(180,180,180), Scalar(255,255,255), imgGray);
-
-	    ////////////////////
+    ////////////////////
 	    vector<Mat> contours;
 	    Mat hierarchy;
 
@@ -277,21 +282,25 @@ JNIEXPORT jint JNICALL Java_com_example_rbf_RBFActivity_processingImage
 	  vector<Point2f>center( contours.size() );
 	  vector<float>radius( contours.size() );
 
-	  for( int i = 0; i < contours.size(); i++ )
+	  if(contours.size()<25)
+	  { for( int i = 0; i < contours.size(); i++ )
 	     { approxPolyDP( Mat(contours[i]), contours_poly[i], 3, true );
 	       boundRect[i] = boundingRect( Mat(contours_poly[i]) );
-	     }
-
-
-
-	  	  Mat& mGray  = *(Mat*)addrGray;
-	  for( int i = 0; i< contours.size(); i++ )
-	     {
 	       Scalar color = Scalar(0,0,255);
-	       drawContours( mGray, contours_poly, i, color, 1, 8, vector<Vec4i>(), 0, Point() );
+	     // drawContours( mGray, contours_poly, i, color, 1, 8, vector<Vec4i>(), 0, Point() );
+	      // Mat inner=mGray(boundRect[i]);
 	       rectangle(mGray, boundRect[i].tl(), boundRect[i].br(), color, 2, 8, 0 );
 
-	     }*/
+           floodFill(inner,   Point((boundRect[i].tl().x+boundRect[i].br().x)/2,(boundRect[i].tl().y+boundRect[i].br().y)/2), 255, (Rect*)0, Scalar(), 200);
+
+	     }
+
+	  }
+	  stringstream t;t<<boundRect.size();
+	  putText(mGray, t.str(), Point(100,100) , FONT_HERSHEY_PLAIN, 2, Scalar(0,255,0),2,3);
+////////////////////////////////////////////////////////////////////////////////////
+	  // */
+
 		return DIRECTION;
 }
 JNIEXPORT void JNICALL Java_com_example_rbf_RBFActivity_perspectiveImage
